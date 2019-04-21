@@ -207,6 +207,7 @@ https://dba.stackexchange.com/questions/179654/developing-a-database-for-a-funds
 ```mysql
 CREATE TABLE IF NOT EXISTS party (
 	id BINARY(16),
+	party_subtype ENUM ('organization', 'person') NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
