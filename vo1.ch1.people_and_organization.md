@@ -59,3 +59,138 @@ INSERT INTO person (id, current_first_name, current_last_name, gender) VALUES
 
 DROP TABLE IF EXISTS person;
 ```
+
+
+## Person - Alternate Model
+```
+-- Gender Type.
+CREATE TABLE IF NOT EXISTS gender_type (
+	id CHAR(1),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO gender_type (id, description) VALUES 
+('m', 'male'), 
+('f', 'female'),
+('o', 'other'),
+('-', 'not registered'); -- NOTE: We could have used 'x' for not registered, but then the third gender happens to be called gender 'x';
+
+DROP TABLE IF EXISTS gender_type;
+
+-- Marital Status & Marital Status Type.
+CREATE TABLE IF NOT EXISTS marital_status_type (
+	id CHAR(1),
+	description VARCHAR(255),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO marital_status_type (id, description) VALUES 
+('1', 'Single. This refers to a person who has never been married.'),
+('2', 'Married. This refers to a person who is recognised as married under the marriage laws in Singapore. It includes a person who has remarried.'),
+('3', 'Widowed. This refers to a person whose spouse(s) is/are deceased and who has not remarried.'),
+('4', 'Separated. This refers to a person who has been legally separated or estranged from his/her spouse(s) and who has not remarried.'),
+('5', 'Divorced. This refers to a person whose marriage(s) has/have been legally dissolved and who has not remarried.'),
+('x', 'Not reported. This includes instances where the marital status is unknown, not reported or where there is no/insufficient information available on the marital status')
+;
+
+DROP TABLE IF EXISTS marital_status_type;
+
+
+CREATE TABLE IF NOT EXISTS marital_status (
+	marital_status_type_id CHAR(1) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1001-01-01', 
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (marital_status_type_id, from_date),
+	FOREIGN KEY (marital_status_type_id) REFERENCES marital_status_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS marital_status;
+
+-- Physical Characteristic & Physical Characteristic Type.
+CREATE TABLE IF NOT EXISTS physical_characteristic_type (
+	id VARCHAR(32),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO physical_characteristic_type (id, description) VALUES 
+('weight', 'weight in kg'),
+('height', 'height in inch'),
+('blood_pressure', 'blood pressure');
+
+CREATE TABLE IF NOT EXISTS physical_characteristic (
+	person_id BINARY(16) NOT NULL,
+	physical_characteristic_type_id VARCHAR(32) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '0001-01-01', 
+	thru_date DATE NOT NULL DEFAULT '9999-12-31', 
+	value VARCHAR(255),
+	PRIMARY KEY (person_id, physical_characteristic_type_id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS physical_characteristic;
+
+-- Person.
+CREATE TABLE IF NOT EXISTS person (
+	id BINARY(16),
+	birth_date DATE NOT NULL DEFAULT '1000-01-01',
+	mothers_maiden_name VARCHAR(255) NOT NULL DEFAULT '',
+	social_security_number VARCHAR(255) NOT NULL DEFAULT '',
+	total_years_work_experience TINYINT NOT NULL DEFAULT 0,
+	comment TEXT,
+	gender_type_id CHAR(1) NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (gender_type_id) REFERENCES gender_type (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+DROP TABLE IF EXISTS person;
+
+
+-- Citizenship & Passport;
+CREATE TABLE IF NOT EXISTS country (
+	id VARCHAR(255),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS country;
+
+-- Citizenship & Passport.
+CREATE TABLE IF NOT EXISTS citizenship (
+	from_date DATE NOT NULL DEFAULT '1000-01-01', 
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	person_id BINARY(16) NOT NULL,
+	country_id VARCHAR(255) NOT NULL,
+	PRIMARY KEY (from_date, person_date, country_id),
+	FOREIGN KEY (country_id) REFERENCES country(id),
+	FOREIGN KEY (person_id) REFERENCES person(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS citizenship;
+
+
+-- Not Complete.
+CREATE TABLE IF NOT EXISTS passport (
+	id BINARY(16),
+	num VARCHAR(255) NOT NULL,
+	issue_date DATE NOT NULL DEFAULT '0001-01-01', 
+	expiration_date DATE NOT NULL DEFAULT '9999-12-31',
+	person_id BINARY(16) NOT NULL,
+	country_id VARCHAR(255) NOT NULL,
+	FOREIGN KEY (country_id) REFERENCES country(id),
+	FOREIGN KEY (person_id) REFERENCES person(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS passport;
+
+/*
+CREATE TABLE IF NOT EXISTS person_name (
+	person_id
+	person_name_type_id
+	name_seq_id
+	from_date
+	thru_date
+	name
+)
+CREATE TABLE IF NOT EXISTS person_name_type (
+	id
+	description
+)
+*/
+```
