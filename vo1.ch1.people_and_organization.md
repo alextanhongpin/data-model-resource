@@ -62,7 +62,7 @@ DROP TABLE IF EXISTS person;
 
 
 ## Person - Alternate Model
-```
+```mysql
 -- Gender Type.
 CREATE TABLE IF NOT EXISTS gender_type (
 	id CHAR(1),
