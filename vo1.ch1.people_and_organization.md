@@ -62,8 +62,9 @@ DROP TABLE IF EXISTS person;
 
 
 ## Person - Alternate Model
+
+Gender:
 ```mysql
--- Gender Type.
 CREATE TABLE IF NOT EXISTS gender_type (
 	id CHAR(1),
 	description VARCHAR(255) NOT NULL DEFAULT '',
@@ -77,8 +78,10 @@ INSERT INTO gender_type (id, description) VALUES
 ('-', 'not registered'); -- NOTE: We could have used 'x' for not registered, but then the third gender happens to be called gender 'x';
 
 DROP TABLE IF EXISTS gender_type;
+```
 
--- Marital Status & Marital Status Type.
+Marital Status & Marital Status Type:
+```sql
 CREATE TABLE IF NOT EXISTS marital_status_type (
 	id CHAR(1),
 	description VARCHAR(255),
@@ -96,7 +99,6 @@ INSERT INTO marital_status_type (id, description) VALUES
 
 DROP TABLE IF EXISTS marital_status_type;
 
-
 CREATE TABLE IF NOT EXISTS marital_status (
 	marital_status_type_id CHAR(1) NOT NULL,
 	from_date DATE NOT NULL DEFAULT '1001-01-01', 
@@ -106,8 +108,10 @@ CREATE TABLE IF NOT EXISTS marital_status (
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS marital_status;
+```
 
--- Physical Characteristic & Physical Characteristic Type.
+Physical Characteristic & Physical Characteristic Type:
+```sql
 CREATE TABLE IF NOT EXISTS physical_characteristic_type (
 	id VARCHAR(32),
 	description VARCHAR(255) NOT NULL DEFAULT '',
@@ -128,8 +132,10 @@ CREATE TABLE IF NOT EXISTS physical_characteristic (
 	PRIMARY KEY (person_id, physical_characteristic_type_id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 DROP TABLE IF EXISTS physical_characteristic;
+```
 
--- Person.
+Person:
+```sql
 CREATE TABLE IF NOT EXISTS person (
 	id BINARY(16),
 	birth_date DATE NOT NULL DEFAULT '1000-01-01',
@@ -193,4 +199,57 @@ CREATE TABLE IF NOT EXISTS person_name_type (
 	description
 )
 */
+```
+
+## Party
+https://dba.stackexchange.com/questions/179654/developing-a-database-for-a-funds-transfers-business-where-a-people-and-organi/179712#179712
+
+```mysql
+CREATE TABLE IF NOT EXISTS party (
+	id BINARY(16),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS party_type (
+	id VARCHAR(255),
+	description VARCHAR(255),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS party_classification (
+	party_id BINARY(16) NOT NULL,
+	party_type_id VARCHAR(255) NOT NULL DEFAULT '',
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (party_id, party_type_id, from_date),
+	FOREIGN KEY (party_id) REFERENCES party(id),
+	FOREIGN KEY (party_type_id) REFERENCES party_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS organization (
+	id BINARY(16),
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	-- Party and Organization shares the same id.
+	FOREIGN KEY (id) REFERENCES party(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS person (
+	id BINARY(16),
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (id) REFERENCES party(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+Test:
+```sql
+SET @id = 'e7f695fa-6446-11e9-bd46-0242ac120002';
+INSERT INTO party (id) VALUES (UUID_TO_BIN(@id, true));
+INSERT INTO organization (id, name) VALUES (UUID_TO_BIN(@id, true), 'John Corp');
+SELECT * FROM party WHERE id = UUID_TO_BIN(@id, true);
+SELECT * FROM organization WHERE id = UUID_TO_BIN(@id, true);
+INSERT INTO party_type (id) VALUES ('large organization');
+INSERT INTO party_classification (party_id, party_type_id) VALUES (UUID_TO_BIN(@id, true), 'large organization');
+SELECT * FROM party_classification WHERE party_id = UUID_TO_BIN(@id, true);
 ```
