@@ -59,3 +59,64 @@ CREATE TABLE IF NOT EXISTS work_effort (
 	FOREIGN KEY (work_effort_type_id) REFERENCES work_effort_type(id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+## Level 2 Expanded Recursive Pattern
+
+```mysql
+CREATE TABLE IF NOT EXISTS work_effort_type (
+	id BINARY(16),
+	parent_work_effort_type_id BINARY(16) NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_work_effort_type_id) REFERENCES work_effort_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort (
+	id BINARY(16),
+	redone_via_work_effort_id BINARY(16) NOT NULL,
+	work_effort_breakdown_id BINARY(16) NOT NULL DEFAULT x'',
+	work_effort_precedent_id BINARY(16) NOT NULL DEFAULT x'',
+	work_effort_type_id BINARY(16) NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	scheduled_start_date DATE NOT NULL DEFAULT '1000-01-01',
+	scheduled_end_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (redone_via_work_effort_id) REFERENCES work_effort(id),
+	FOREIGN KEY (work_effort_breakdown_id) REFERENCES work_effort_breakdown(id),
+	FOREIGN KEY (work_effort_precedent_id) REFERENCES work_effort_precedent(id),
+	FOREIGN KEY (work_effort_type_id) REFERENCES work_effort_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort_breakdown (
+	id BINARY(16),
+	parent_work_effort_id BINARY(16) NOT NULL,
+	child_work_effort_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_work_effort_id) REFERENCES work_effort_breakdown(id),
+	FOREIGN KEY (child_work_effort_id) REFERENCES work_effort_breakdown(id),
+	UNIQUE (parent_work_effort_id, child_work_effort_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort_precedent (
+	id BINARY(16),
+	dependent_work_effort_id BINARY(16) NOT NULL,
+	prerequisite_work_effort_id BINARY(16) NOT NULL,
+	work_effort_precedent_type_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (dependent_work_effort_id) REFERENCES work_effort_precedent(id),
+	FOREIGN KEY (prerequisite_work_effort_id) REFERENCES work_effort_precedent(id),
+	FOREIGN KEY (work_effort_precedent_type_id) REFERENCES work_effort_precedent_type(id),
+	UNIQUE (dependent_work_effort_id, prerequisite_work_effort_id, work_effort_precedent_type_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE IF NOT EXISTS work_effort_precedent_type (
+	id BINARY(16),
+	name VARCHAR(255) NOT NULL DEFAULT ''
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
