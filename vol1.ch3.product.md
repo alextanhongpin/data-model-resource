@@ -90,3 +90,62 @@ INSERT INTO identification_type (id) VALUES
 ('upce'),
 ('other_id');
 ```
+
+
+## Product Feature
+
+```mysql
+CREATE TABLE IF NOT EXISTS product (
+	id BINARY(16),
+	subtype ENUM('good', 'service') NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	introduction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	sales_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	support_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	comment VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_feature_category (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO product_feature_category (id) VALUES 
+('product_quality'),
+('color'),
+('dimension'),
+('size'),
+('brand'),
+('software_feature'),
+('hardware_feature'),
+('billing_feature'),
+('other_feature');
+
+
+CREATE TABLE IF NOT EXISTS product_feature (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	product_feature_category_id VARCHAR(255) NOT NULL,
+	value VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (product_feature_category_id) REFERENCES product_feature_category(id),
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+/* TODO: Clarify table (?).
+CREATE TABLE IF NOT EXISTS product_feature_interaction (
+	feature_interaction_incompatibility 
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+*/
+
+CREATE TABLE IF NOT EXISTS product_feature_applicability (
+	from_date DATE NOT NULL CURRENT_DATE,
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	product_feature_id VARCHAR(255) NOT NULL,
+	product_id BINARY(16) NOT NULL,
+	FOREIGN KEY (product_id) REFERENCES product(id),
+	FOREIGN KEY (product_feature_id) REFERENCES product_feature(id)
+	PRIMARY KEY (product_id, product_feature_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
