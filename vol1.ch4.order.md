@@ -270,6 +270,77 @@ CREATE TABLE IF NOT EXISTS order_role (
 
 ## Order Adjustment 
 
+```mysql
+CREATE TABLE IF NOT EXISTS order (
+	id BINARY(16),
+	order_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	subtype ENUM ('sales', 'purchase') NOT NULL,
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_item (
+	order_id BINARY(16) NOT NULL,
+	order_item_seq_id UNSIGNED INT NOT NULL DEFAULT 1,
+	quantity INT NOT NULL DEFAULT 0,
+	unit_price DECIMAL(13,4) NOT NULL DEFAULT 0,
+	shipping_instructions VARCHAR(255) NOT NULL DEFAULT '',
+	estimated_delivery_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	item_description VARCHAR(255) NOT NULL DEFAULT '',
+	subtype ENUM ('sales', 'purchase') NOT NULL,
+	PRIMARY KEY (order_item_seq_id, order_id),
+	FOREIGN KEY (order_id) REFERENCES order(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_adjustment (
+	-- NOTE: The id is XOR order_item_id or order_id.
+	id BINARY(16),
+	amount DECIMAL(13,4) NOT NULL DEFAULT 0,
+	percentage DECIMAL(5,4) NOT NULL DEFAULT 0,
+	order_adjustment_type_id VARCHAR(255) NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (order_adjustment_type_id) REFERENCES order_adjustment_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_adjustment_type (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO order_adjustment_type (id) VALUES
+('miscelleanous_charge'),
+('sales_tax'),
+('discount_adjustment'),
+('shipping_and_handling_charge'),
+('surcharge_adjustment'),
+('fee');
+
+CREATE TABLE IF NOT EXISTS geographic_boundary (
+	id BINARY(16),
+	geo_code VARCHAR(255) NOT NULL DEFAULT '',
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	abbreviation VARCHAR(255) NOT NULL DEFAULT '',
+	subtype ENUM('country', 'city', 'state') NOT NULL,
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category (
+	id BINARY(16),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS sales_tax_lookup (
+	sales_tax_seq_id UNSIGNED INT,
+	sales_tax_percentage DECIMAL(5,4) NOT NULL DEFAULT 0,
+	geographic_boundary_id BINARY(16) NOT NULL DEFAULT x'',
+	product_category_id BINARY(16) NOT NULL DEFAULT x'',
+	PRIMARY KEY (sales_tax_seq_id, geographic_boundary_id),
+	FOREIGN KEY (geographic_boundary_id) REFERENCES geographic_boundary(id)
+	FOREIGN KEY (product_category_id) REFERENCES product_category(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
 
 ## Order Status
 ## Order Item Association
