@@ -140,4 +140,44 @@ CREATE TABLE IF NOT EXISTS project_sponsor (
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
+## Level 2 Contextual Role Pattern, PARTY Only Alternative
 
+```mysql
+CREATE TABLE IF NOT EXISTS party (
+	id BINARY(16),
+	subtype ENUM('person', 'organization')
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project_sponsor (
+	id BINARY(16),
+	party_id BINARY(16) NOT NULL,
+	project_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	thru_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_id) REFERENCES party(id),
+	FOREIGN KEY (project_id) REFERENCES project(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project_worker (
+	id BINARY(16),
+	party_id BINARY(16) NOT NULL,
+	project_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	thru_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_id) REFERENCES party(id),
+	FOREIGN KEY (project_id) REFERENCES project(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project (
+	id BINARY(16),
+	project_lead_party_id BINARY(16) NOT NULL,
+	project_name VARCHAR(255) NOT NULL DEFAULT '',
+	scheduled_start_date DATE NOT NULL DEFAULT '1000-01-01',
+	estimated_hours TINYINT NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	FOREIGN KEY (project_lead_party_id) REFERENCES party(id),
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
