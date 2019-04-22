@@ -51,3 +51,42 @@ CREATE TABLE IF NOT EXISTS party_type (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+
+## Product Identification Code
+
+```mysql
+CREATE TABLE IF NOT EXISTS product (
+	id BINARY(16),
+	subtype ENUM('good', 'service') NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	introduction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	sales_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	support_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	comment VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS good_identification (
+	id BINARY(16),
+	product_id BINARY(16) NOT NULL,
+	identification_type_id VARCHAR(255) NOT NULL,
+	FOREIGN KEY (product_id) REFERENCES product(id),
+	FOREIGN KEY (identification_type_id) REFERENCES identification_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- NOTE: Find a way to constraint the primary key length, use a shorter code rather than varchar(255).
+CREATE TABLE IF NOT EXISTS identification_type (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO identification_type (id) VALUES 
+('manufacturer_id_no'),
+('upca'),
+('sku'),
+('isbn'),
+('upce'),
+('other_id');
+```
