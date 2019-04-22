@@ -149,3 +149,73 @@ CREATE TABLE IF NOT EXISTS product_feature_applicability (
 	PRIMARY KEY (product_id, product_feature_id, from_date)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+
+## Suppliers and manufacturers of products
+SKIP
+## Inventory item storage
+SKIP
+
+## Product Pricing
+```mysql
+CREATE TABLE IF NOT EXISTS product (
+	id BINARY(16),
+	subtype ENUM('good', 'service') NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	introduction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	sales_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	support_discontinuation_date DATE NOT NULL DEFAULT '9999-12-31',
+	comment VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_feature (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+);
+CREATE TABLE IF NOT EXISTS organization (
+	party_id BINARY(16),
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (party_id),
+	FOREIGN KEY (party_id) REFERENCES party(id) 
+);
+
+CREATE TABLE IF NOT EXISTS price_component (
+	id BINARY (16),
+	product_id BINARY(16) NOT NULL,
+	product_feature_id BINARY(16) NOT NULL,
+	
+	-- Variables...
+	price_component_type_id -- Refer to the price component type...
+	geographic_boundary
+	party_type
+	product_category
+	quantity_break
+	order_value
+	sale_type
+	unit_of_measure
+	
+	organization_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	price DECIMAL(13,4) NOT NULL DEFAULT 0,
+	percent DECIMAL(5,4) NOT NULL DEFAULT 0,
+	comment VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS price_component_type (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+);
+INSERT INTO price_component (id) VALUES 
+('base_price'),
+('discount_component'),
+('surcharge_component'),
+('manufacturer_suggested_price'),
+('one_time_charge'),
+('recurring_charge'),
+('utilization_charge');
+```
