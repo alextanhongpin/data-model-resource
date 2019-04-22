@@ -343,6 +343,65 @@ CREATE TABLE IF NOT EXISTS sales_tax_lookup (
 ```
 
 ## Order Status
+
+```mysql
+CREATE TABLE IF NOT EXISTS order (
+	id BINARY(16),
+	order_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	subtype ENUM ('sales', 'purchase') NOT NULL,
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_item (
+	order_id BINARY(16) NOT NULL,
+	order_item_seq_id UNSIGNED INT NOT NULL DEFAULT 1,
+	quantity INT NOT NULL DEFAULT 0,
+	unit_price DECIMAL(13,4) NOT NULL DEFAULT 0,
+	shipping_instructions VARCHAR(255) NOT NULL DEFAULT '',
+	estimated_delivery_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	item_description VARCHAR(255) NOT NULL DEFAULT '',
+	subtype ENUM ('sales', 'purchase') NOT NULL,
+	PRIMARY KEY (order_item_seq_id, order_id),
+	FOREIGN KEY (order_id) REFERENCES order(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS term_type (
+	id BINARY(16),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)	
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_term (
+	id BINARY(16),
+	term_value VARCHAR(255) NOT NULL DEFAULT '',
+	term_type_id VARCHAR(255) NOT NULL DEFAULT '',
+	subtype ENUM('order', 'order_item') NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (term_type_id) REFERENCES term_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS order_status_type (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO order_status_type (id) VALUES 
+('received'),
+('approved'),
+('cancelled');
+
+CREATE TABLE IF NOT EXISTS order_status (
+	id BINARY(16),
+	order_status_type_id VARCHAR(255) NOT NULL DEFAULT '',
+	subtype ENUM ('order', 'order_item') NOT NULL,
+	status_datetime DATE NOT NULL DEFAULT CURRENT_DATE,
+	PRIMARY KEY (id),
+	FOREIGN KEY (order_status_type) REFERENCES order_status_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
 ## Order Item Association
 ## Requirements
 ## Requests
