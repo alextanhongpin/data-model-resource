@@ -219,3 +219,17 @@ INSERT INTO price_component (id) VALUES
 ('recurring_charge'),
 ('utilization_charge');
 ```
+
+
+## Product Costing
+
+SKIP
+
+## Product to Product Associations
+
+SKIP
+
+## Products and Parts
+
+
+
