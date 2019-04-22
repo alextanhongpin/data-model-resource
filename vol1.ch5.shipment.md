@@ -50,3 +50,43 @@ CREATE TABLE IF NOT EXISTS shipment (
 	FOREIGN KEY (contact_mechanism_id) REFERENCES contact_mechanism(id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+
+## Shipment Detail
+
+```mysql
+CREATE TABLE IF NOT EXISTS shipment_item (
+	shipment_id BINARY(16) NOT NULL,
+	shipment_item_seq_id UNSIGNED INT NOT NULL DEFAULT 1,
+	quantity TINYINT NOT NULL DEFAULT 0,
+	generating_shipment_id BINARY(16) NOT NULL DEFAULT x'',
+	shipment_contents_description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (shipment_id, shipment_item_seq_id),
+	FOREIGN KEY (shipment_id) REFERENCES shipment (id),
+	FOREIGN KEY (generating_shipment_id) REFERENCES shipment_item (shipment_id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS shipment_status_type (
+	id VARCHAR(255),
+	description VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS shipment_status (
+	shipment_id BINARY(16),
+	shipment_status_type_id VARCHAR(255) NOT NULL,
+	status_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	PRIMARY KEY (shipment_id, shipment_status_type_id),
+	FOREIGN KEY (shipment_id) REFERENCES shipment(id),
+	FOREIGN KEY (shipment_status_type_id) REFERENCES shipment_status_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+
+## Shipment-to-Order Relationship
+## Shipment Receipts
+## Item Issuance for Outgoing Shipments
+## Shipment Documents
+## Shipment Routing 
+## Shipment Vehicle
+
