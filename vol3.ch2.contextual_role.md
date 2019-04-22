@@ -66,3 +66,78 @@ CREATE TABLE IF NOT EXISTS project_worker (
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
+
+## Level 2 Contextual Role
+
+```mysql
+CREATE TABLE IF NOT EXISTS project (
+	id BINARY(16),
+	project_role_id VARCHAR(255) NOT NULL,
+	project_name VARCHAR(255) NOT NULL DEFAULT '',
+	scheduled_start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	estimated_hours TINYINT NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	FOREIGN KEY (project_role_id) REFERENCES project_role(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS party (
+	id BINARY(16),
+	subtype ENUM('person', 'organization')
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project_sponsor (
+	id BINARY(16),
+	party_role_id BINARY(16) NOT NULL,
+	project_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_role_id) REFERENCES party_role(id),
+	FOREIGN KEY (project_id) REFERENCES project(id),
+	UNIQUE (party_role_id, project_id, from_date) 
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project_worker (
+	id BINARY(16),
+	party_role_id BINARY(16) NOT NULL,
+	project_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_role_id) REFERENCES party_role(id),
+	FOREIGN KEY (project_id) REFERENCES project(id),
+	UNIQUE (party_role_id, project_id, from_date) 
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS role_type (
+	id VARCHAR(255),
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	parent_role_type_id VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_role_type_id) REFERENCES parent_role_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS party_role (
+	id BINARY(16),
+	party_id BINARY(16) NOT NULL DEFAULT x'',
+	role_type_id VARCHAR(255) NOT NULL DEFAULT '',
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_id) REFERENCES party(id),
+	FOREIGN KEY (role_type_id) REFERENCES role_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS project_sponsor (
+	id BINARY(16),
+	party_role_id VARCHAR(255) NOT NULL,
+	project_id BINARY(16) NOT NULL DEFAULT x'',
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_role_id) REFERENCES party(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+
