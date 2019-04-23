@@ -110,4 +110,93 @@ CREATE TABLE IF NOT EXISTS product (
 ```
 
 
+## Level 3 Classification Pattern with Rollups and Schemes
+
+```mysql
+
+CREATE TABLE IF NOT EXISTS product (
+	id INT UNSIGNED AUTO_INCREMENT,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE IF NOT EXISTS product_category_classification (
+	id BINARY(16),
+	product_id INT UNSIGNED NOT NULL DEFAULT 0,
+	product_category_id INT UNSIGNED NOT NULL DEFAULT 0,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id)
+	FOREIGN KEY (product_id) REFERENCES product(id),
+	FOREIGN KEY (product_category_id) REFERENCES product_category(id),
+	UNIQUE (product_id, product_category_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category (
+	id INT UNSIGNED AUTO_INCREMENT,
+	product_category_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (product_category_type_id) REFERENCES product_category_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category_type (
+	id INT UNSIGNED AUTO_INCREMENT,
+	product_category_type_scheme_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (product_category_type_scheme_id) REFERENCES product_category_type_scheme(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category_type_scheme (
+	id INT UNSIGNED AUTO_INCREMENT,
+	party_role_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_role_id) REFERENCES party_role(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS party_role (
+	id INT UNSIGNED AUTO_INCREMENT,
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category_rollup (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_product_category_id INT UNSIGNED NOT NULL DEFAULT 0,
+	child_product_category_id INT UNSIGNED NOT NULL DEFAULT 0,
+	product_category_rollup_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_product_category_id) REFERENCES product_category(id),
+	FOREIGN KEY (child_product_category_id) REFERENCES product_category(id),
+	FOREIGN KEY (product_category_rollup_type_id) REFERENCES product_category_rollup_type(id),
+	UNIQUE (parent_product_category_id, child_product_category_id, product_category_rollup_type_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category_type_rollup (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_product_category_type_id INT UNSIGNED NOT NULL DEFAULT 0,  
+	child_product_category_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	product_category_type_rollup_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_product_category_type_id) REFERENCES product_category_type(id),
+	FOREIGN KEY (child_product_category_type_id) REFERENCES product_category_type(id),
+	FOREIGN KEY (product_category_type_rollup_type_id) REFERENCES product_category_type_rollup_type(id),
+	UNIQUE (parent_product_category_type_id, child_product_category_type_id, product_category_type_rollup_type_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS product_category_type_rollup_type (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_product_category_type_rollup_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_product_category_type_rollup_type_id) REFERENCES product_category_type_rollup_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
 
