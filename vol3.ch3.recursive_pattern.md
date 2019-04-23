@@ -120,3 +120,50 @@ CREATE TABLE IF NOT EXISTS work_effort_precedent_type (
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+
+## Level 3 Recursive Pattern
+
+```mysql
+CREATE TABLE IF NOT EXISTS work_effort_association (
+	id BINARY(16),
+	from_work_effort_id BINARY(16) NOT NULL,
+	to_work_effort_id BINARY(16) NOT NULL,
+	work_effort_association_type_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (from_work_effort_id) REFERENCES work_effort(id),
+	FOREIGN KEY (to_work_effort_id) REFERENCES work_effort(id),
+	FOREIGN KEY (work_effort_association_type_id) REFERENCES work_effort_association_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort_association_type (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_work_effort_association_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_work_effort_association_type_id) REFERENCES work_effort_association_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort (
+	id BINARY(16),
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	work_effort_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	scheduled_start_date DATE NOT NULL DEFAULT '1000-01-01',
+	scheduled_end_date DATE NOT NULL DEFAULT '9999-12-31',
+	estimated_hours TINYINT NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	FOREIGN KEY (work_effort_type_id) REFERENCES work_effort_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS work_effort_type (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_work_effort_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_work_effort_type_id) REFERENCES work_effort_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+
