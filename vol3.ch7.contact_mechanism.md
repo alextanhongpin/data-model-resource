@@ -362,3 +362,119 @@ CREATE TABLE IF NOT EXISTS contact_mechanism_purpose (
 	UNIQUE (party_contact_mechanism_id, facility_contact_mechanism_id, order_contact_mechanism_id, contact_mechanism_purpose_type_id, from_date)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
 ```
+
+
+## Level 4 Contact Mechanism Pattern
+
+```mysql
+CREATE TABLE IF NOT EXISTS geographic_boundary_type (
+	id INT UNSIGNED AUTO_INCREMENT,
+	name VARCHAR(32) NOT NULL DEFAULT '',
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+INSERT INTO geographic_boundary_type (name) VALUES 
+('postal_code'),
+('county'),
+('province'),
+('city'),
+('territory'),
+('prefecture'),
+('state'),
+('canton'),
+('region'),
+('subdivision'),
+('continent'),
+('country');
+
+CREATE TABLE IF NOT EXISTS geographic_boundary (
+	id INT UNSIGNED AUTO_INCREMENT,
+	geographic_boundary_type_id INT UNSIGNED NOT NULL DEFAULT 0,
+	geographic_boundary_code VARCHAR(255) NOT NULL DEFAULT '',
+	abbreviation VARCHAR(255) NOT NULL DEFAULT ''
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS postal_address_boundary (
+	id BINARY(16),
+	contact_mechanism_id BINARY(16) NOT NULL DEFAULT x'',
+	geographic_boundary_id INT UNSIGNED NOT NULL DEFAULT 0,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS contact_mechanism (
+	id BINARY(16),
+	subtype ENUM('telecommunication_number', 'electronic_address', 'postal_address'),
+	country_code VARCHAR(255) NOT NULL DEFAULT '',
+	area_code VARCHAR(255) NOT NULL DEFAULT '',
+	phone_number VARCHAR(255) NOT NULL DEFAULT '',
+	electronic_address_string VARCHAR(255) NOT NULL DEFAULT '',
+	street_address_part_1 VARCHAR(255) NOT NULL DEFAULT '',
+	street_address_part_2 VARCHAR(255) NOT NULL DEFAULT '',
+	street_address_part_3 VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS contact_mechanism_application (
+	id BINARY(16),
+	party_id BINARY(16) NOT NULL,
+	facility_id BINARY(16) NOT NULL,
+	order_id BINARY(16) NOT NULL,
+	contact_mechanism_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01', 
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (party_id) REFERENCES party(id),
+	FOREIGN KEY (facility_id) REFERENCES facility(id),
+	FOREIGN KEY (order_id) REFERENCES order(id),
+	FOREIGN KEY (contact_mechanism_id) REFERENCES contact_mechanism(id),
+	UNIQUE (party_id, facility_id, order_id, contact_mechanism_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS party (
+	id BINARY(16),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS facility (
+	id BINARY(16),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS order (
+	id BINARY(16),
+	PRIMARY KEY (id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS contact_mechanism_category (
+	id INT UNSIGNED AUTO_INCREMENT,
+	parent_contact_mechanism_category_id INT UNSIGNED NOT NULL,
+	contact_mechanism_category_type_id INT UNSIGNED NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_contact_mechanism_category_id) REFERENCES parent_contact_mechanism_category(id),
+	FOREIGN KEY (contact_mechanism_category_type_id) REFERENCES contact_mechanism_category_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS contact_mechanism_category_type (
+	id INT UNSIGNED AUTO_INCREMENT
+	parent_contact_mechanism_category_type_id
+	name VARCHAR(255)
+	PRIMARY KEY (id),
+	FOREIGN KEY (parent_contact_mechanism_category_type_id) REFERENCES contact_mechanism_category_type(id)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+
+CREATE TABLE IF NOT EXISTS contact_mechanism_category_classification (
+	id BINARY(16),
+	contact_mechanism_category_id INT UNSIGNED NOT NULL,
+	contact_mechanism_id BINARY(16) NOT NULL,
+	contact_mechanims_application_id BINARY(16) NOT NULL,
+	from_date DATE NOT NULL DEFAULT '1000-01-01',
+	thru_date DATE NOT NULL DEFAULT '9999-12-31',
+	PRIMARY KEY (id),
+	FOREIGN KEY (contact_mechanism_category_id) REFERENCES contact_mechanism_category(id),
+	FOREIGN KEY (contact_mechanism_id) REFERENCES contact_mechanism_id(id),
+	FOREIGN KEY (contact_mechanism_application_id) REFERENCES contact_mechanism_application_id(id),
+	UNIQUE (contact_mechanism_category_id, contact_mechanism_id, contact_mechanism_application_id, from_date)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci; 
+```
