@@ -1,3 +1,12 @@
+# Status Patterns
+
+- there is a need to track the status of the entity
+- create a status type table to keep a list of statuses and status description
+- use past tense for the status name, e.g. order_created, activated, updated rather than active, create_order (these belong to imperative command naming). The naming convention is similar to event sourcing.
+- ask yourself if you need to keep track of the current status only or every status change. Using event sourcing to capture changes is also another alternative
+- do not mix two different statuses (order status and payment status)
+- if there's a relationship for the status between different entity, take a look at Level 4 Status Pattern
+
 ## Level 1 Status Pattern.
 
 ```mysql
