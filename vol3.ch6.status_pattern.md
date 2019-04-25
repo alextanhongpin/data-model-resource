@@ -7,6 +7,7 @@
 - do not mix two different statuses (order status and payment status)
 - if there's a relationship for the status between different entity, take a look at Level 4 Status Pattern
 - for statuses that has a validity period, rather than `activated`, use the terms `term_started`, `term_ended`.
+- for pending statuses, use `_requested`, e.g. `order_requested`, `approval_requested`, etc.
 
 ## Level 1 Status Pattern.
 
