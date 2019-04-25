@@ -6,6 +6,7 @@
 - ask yourself if you need to keep track of the current status only or every status change. Using event sourcing to capture changes is also another alternative
 - do not mix two different statuses (order status and payment status)
 - if there's a relationship for the status between different entity, take a look at Level 4 Status Pattern
+- for statuses that has a validity period, rather than `activated`, use the terms `term_started`, `term_ended`.
 
 ## Level 1 Status Pattern.
 
