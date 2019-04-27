@@ -8,6 +8,7 @@
 - if there's a relationship for the status between different entity, take a look at Level 4 Status Pattern
 - for statuses that has a validity period, rather than `activated`, use the terms `term_started`, `term_ended`.
 - for pending statuses, use `_requested`, e.g. `order_requested`, `approval_requested`, etc.
+- for simple cases where we need to know the current status, the Level 2 Status Pattern, Current Status is sufficient. but for most cases, it is good to be able to track the changes in status
 
 ## Level 1 Status Pattern.
 
