@@ -168,32 +168,42 @@ CREATE TABLE IF NOT EXISTS status_type_category_application (
 ## Status Type with Multi Rollup and Rules Pattern
 
 ```mysql
+drop database test;
+create database test;
+use test;
+
+
 CREATE TABLE IF NOT EXISTS status_type (
 	id INT UNSIGNED AUTO_INCREMENT,
 	name VARCHAR(255) NOT NULL DEFAULT '',
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (name)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS status_type_category (
-	id INT UNSIGNED AUTO_INCREMENT,
-	name VARCHAR(255) NOT NULL DEFAULT '',
-	PRIMARY KEY (id)
-) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS status_type_association_rule (
 	id INT UNSIGNED AUTO_INCREMENT,
 	name VARCHAR(255) NOT NULL DEFAULT '',
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (name)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS status_type_association_type (
 	id INT UNSIGNED AUTO_INCREMENT,
 	name VARCHAR(255) NOT NULL DEFAULT '',
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (name)
+) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS status_type_category (
+	id INT UNSIGNED AUTO_INCREMENT,
+	name VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	UNIQUE (name)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS status_type_association (
-	id BINARY(16),
+	id INT UNSIGNED AUTO_INCREMENT,
 	from_status_type_id INT UNSIGNED NOT NULL,
 	to_status_type_id INT UNSIGNED NOT NULL,
 	status_type_association_rule_id INT UNSIGNED NOT NULL,
@@ -209,6 +219,83 @@ CREATE TABLE IF NOT EXISTS status_type_association (
 	FOREIGN KEY (status_type_category_id) REFERENCES status_type_category(id),
 	UNIQUE (from_status_type_id, to_status_type_id, status_type_association_rule_id, status_type_association_type_id, status_type_category_id, from_date)
 ) ENGINE=InnoDB CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO status_type_association_type
+(name) VALUES 
+('peer-to-peer-association'),
+('aggregation'),
+('hierachy');
+
+INSERT INTO status_type_association_rule 
+(name) VALUES
+('precedence'),
+('compatible'),
+('implied'),
+('exclusion'),
+('substitution'),
+('obsolescent');
+
+INSERT INTO status_type_category 
+(name) VALUES 
+('jira workflow');
+
+INSERT INTO status_type 
+(name) VALUES
+('start'),
+('open'),
+('resolved'),
+('reopened'),
+('closed'),
+('in_progress')
+;
+
+
+INSERT INTO status_type_association (
+	from_status_type_id,
+	to_status_type_id,
+	status_type_association_rule_id,
+	status_type_association_type_id,
+	status_type_category_id
+) VALUES 
+(1, 2, 1, 3, 1), -- start to open
+(2, 6, 1, 3, 1), -- open to in progress
+(2, 3, 1, 3, 1), -- open to resolved
+(2, 5, 1, 3, 1), -- open to closed
+(3, 5, 1, 3, 1), -- resolved to closed
+(3, 4, 1, 3, 1), -- resolved to reopened
+(4, 5, 1, 3, 1), -- reopened to closed
+(4, 6, 1, 3, 1), -- reopened to in progress
+(4, 3, 1, 3, 1), -- reopened to resolved
+(5, 5, 1, 3, 1), -- closed to closed
+(6, 2, 1, 3, 1), -- in progress to open
+(6, 3, 1, 3, 1), -- in progress to resolved
+(6, 5, 1, 3, 1) -- in progress to closed
+;
+
+select 
+st.id as status_from_id,
+st.name as status_from,
+st2.id as status_to_id,
+st2.name as status_to,
+star.name as rule,
+stat.name as type,
+stc.name as category
+from status_type_association sta
+left join status_type st on (st.id = sta.from_status_type_id)
+left join status_type st2 on (st2.id = sta.to_status_type_id)
+left join status_type_association_rule star on (star.id = sta.status_type_association_rule_id)
+left join status_type_association_type stat on (stat.id = sta.status_type_association_type_id)
+left join status_type_category stc on (stc.id = sta.status_type_category_id)
+;
+
+
+-- What does the status 'open' leads to?
+select
+st.name as to_status
+from status_type_association sta
+left join status_type st on (st.id = sta.to_status_type_id)
+where from_status_type_id = 2; -- 'open'
 ```
 
 
